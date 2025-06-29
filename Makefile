@@ -16,5 +16,8 @@ migratedown:
 
 sqlc:
 	sqlc generate
+
+test:
+	go test -v -cover ./...
 	
 .phony: postgres, createdb, deletedb, migrateup, migratedown, sqlc
