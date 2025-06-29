@@ -1,0 +1,39 @@
+version: "2"
+sql:
+  - engine: "postgresql"
+    queries: "./db/query/"
+    schema: "./db/migration/"
+    gen:
+      go:
+        package: "db"
+        out: "db/sqlc"
+        sql_package: "pgx/v5"
+        emit_json_tags: true
+        emit_prepared_queries: false
+        emit_interface: true
+        emit_empty_slices: true
+        emit_exact_table_names: true
+        overrides:
+            - db_type: "timestamptz"
+              go_type: "time.Time"
+            - db_type: "uuid"
+              go_type: "github.com/google/uuid.UUID"
+
+# 基本設定
+# version: "2": sqlcの設定ファイルのバージョンを指定。v2形式を使用。
+# SQL設定
+# engine: "postgresql": 使用するデータベースエンジンを指定。PostgreSQLを対象とする。
+# queries: "./db/query/": SQLクエリファイル（.sqlファイル）が格納されているディレクトリを指定。
+# schema: "./db/migration/": データベーススキーマファイル（マイグレーションファイル）が格納されているディレクトリを指定。
+# Go言語生成設定
+# package: "db": 生成されるGoコードのパッケージ名を指定。
+# out: "db/sqlc": 生成されるGoファイルの出力先ディレクトリを指定。
+# sql_package: "pgx/v5": 使用するPostgreSQLドライバーを指定。pgx v5を使用。
+# コード生成オプション
+# emit_json_tags: true: 構造体フィールドにJSONタグを自動生成。API開発に便利。
+# emit_interface: true: データベース操作用のインターフェースを生成。テストやモックに使用。
+# emit_empty_slices: true: 空のスライスをnilではなく空のスライスとして初期化。
+# 型オーバーライド設定
+# timestamptz → time.Time: PostgreSQLのtimestamptz型をGoの標準time.Time型にマッピング。
+# uuid → github.com/google/uuid.UUID: PostgreSQLのuuid型をgoogle/uuidライブラリのUUID型にマッピング。
+# この設定により、PostgreSQLデータベースに対するタイプセーフなGoコードが自動生成され、JSON APIやテストに適した構造になります。
