@@ -10,6 +10,7 @@ import (
 )
 
 var testQueries *Queries
+var testStore Store
 
 const (
 	dbDriver = "postgres"
@@ -23,5 +24,6 @@ func TestMain(m *testing.M) {
 	}
 
 	testQueries = New(connPool)
+	testStore = NewStore(connPool)
 	os.Exit(m.Run())
 }
