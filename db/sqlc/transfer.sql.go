@@ -9,21 +9,21 @@ import (
 	"context"
 )
 
-const creatTransfer = `-- name: CreatTransfer :one
+const createTransfer = `-- name: CreateTransfer :one
 INSERT INTO transfers (from_account_id, to_account_id, amount)
 VALUES ($1, $2, $3)
 RETURNING id, from_account_id, to_account_id, amount, created_at
 `
 
-type CreatTransferParams struct {
+type CreateTransferParams struct {
 	FromAccountID int64 `json:"from_account_id"`
 	ToAccountID   int64 `json:"to_account_id"`
 	Amount        int64 `json:"amount"`
 }
 
-func (q *Queries) CreatTransfer(ctx context.Context, arg CreatTransferParams) (Transfers, error) {
-	row := q.db.QueryRow(ctx, creatTransfer, arg.FromAccountID, arg.ToAccountID, arg.Amount)
-	var i Transfers
+func (q *Queries) CreateTransfer(ctx context.Context, arg CreateTransferParams) (Transfer, error) {
+	row := q.db.QueryRow(ctx, createTransfer, arg.FromAccountID, arg.ToAccountID, arg.Amount)
+	var i Transfer
 	err := row.Scan(
 		&i.ID,
 		&i.FromAccountID,
@@ -39,9 +39,9 @@ SELECT id, from_account_id, to_account_id, amount, created_at FROM transfers
 WHERE id = $1 LIMIT 1
 `
 
-func (q *Queries) GetTransfer(ctx context.Context, id int64) (Transfers, error) {
+func (q *Queries) GetTransfer(ctx context.Context, id int64) (Transfer, error) {
 	row := q.db.QueryRow(ctx, getTransfer, id)
-	var i Transfers
+	var i Transfer
 	err := row.Scan(
 		&i.ID,
 		&i.FromAccountID,
@@ -67,7 +67,7 @@ type ListTransfersParams struct {
 	Offset        int32 `json:"offset"`
 }
 
-func (q *Queries) ListTransfers(ctx context.Context, arg ListTransfersParams) ([]Transfers, error) {
+func (q *Queries) ListTransfers(ctx context.Context, arg ListTransfersParams) ([]Transfer, error) {
 	rows, err := q.db.Query(ctx, listTransfers,
 		arg.FromAccountID,
 		arg.ToAccountID,
@@ -78,9 +78,9 @@ func (q *Queries) ListTransfers(ctx context.Context, arg ListTransfersParams) ([
 		return nil, err
 	}
 	defer rows.Close()
-	items := []Transfers{}
+	items := []Transfer{}
 	for rows.Next() {
-		var i Transfers
+		var i Transfer
 		if err := rows.Scan(
 			&i.ID,
 			&i.FromAccountID,
