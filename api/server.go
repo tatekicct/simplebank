@@ -1,22 +1,35 @@
 package api
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/gin-gonic/gin/binding"
 	"github.com/go-playground/validator/v10"
 	db "github.com/tatekicct/simplebank/db/sqlc"
+	"github.com/tatekicct/simplebank/token"
+	"github.com/tatekicct/simplebank/util"
 )
 
 // Server serrves HTTP requests for our banking service
 type Server struct {
-	store  db.Store
-	router *gin.Engine
+	config     util.Config
+	store      db.Store
+	tokenMaker token.Maker
+	router     *gin.Engine
 }
 
 // NewServer creates a new HTTP server and sets up routing
-func NewServer(store db.Store) *Server {
+func NewServer(config util.Config, store db.Store) (*Server, error) {
+	tokenMaker, err := token.NewPasetoMaker(config.TokenSymmetricKey)
+	// tokenMaker, err := token.NewJWTMaker(config.TokenSymmetricKey)
+	if err != nil {
+		return nil, fmt.Errorf("cannnot create token maker: %w", err)
+	}
 	server := &Server{
-		store: store,
+		config:     config,
+		store:      store,
+		tokenMaker: tokenMaker,
 	}
 
 	// Set up custom validation for currency
@@ -25,7 +38,7 @@ func NewServer(store db.Store) *Server {
 	}
 	server.setupRouter()
 
-	return server
+	return server, nil
 }
 
 // Start runs the HTTP server on the specified address
@@ -41,6 +54,7 @@ func (server *Server) setupRouter() {
 	router := gin.Default()
 
 	router.POST("/users", server.createUser)
+	router.POST("/users/login", server.loginUser)
 
 	router.POST("/accounts", server.createAccount)
 	router.GET("/accounts/:id", server.getAccount)
