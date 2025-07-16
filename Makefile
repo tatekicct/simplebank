@@ -2,12 +2,12 @@
 DB_URL=postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable
 
 postgres:
-	docker run --name postgres17 -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d postgres:17-alpine
+	docker run --name postgres17 --network bank-network -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d postgres:17-alpine
 
 createdb: 
 	docker exec -it postgres17 createdb --username=root --owner=root simple_bank
 
-deletedb: 
+dropdb: 
 	docker exec -it postgres17 dropdb simple_bank
 
 migrateup:
@@ -36,4 +36,4 @@ server:
 mock:
 	mockgen -package mockdb -destination db/mock/store.go github.com/tatekicct/simplebank/db/sqlc/ Store
 	
-.PHONY: postgres createdb deletedb migrateup migratedown migrateup1 migratedown1 sqlc test server mock
+.PHONY: postgres createdb dropdb migrateup migratedown migrateup1 migratedown1 sqlc test server mock
